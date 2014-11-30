@@ -4,21 +4,38 @@ var objectifsListData = [];
 
 $(document).ready(function() {
 	socket.on('server_message', function(message) {
-		console.log(message);
 		newQuest(message);
 	});
 
 	populateList();
 
 	$("#new_obj").click(function(){
-		socket.emit('new_obj', {
-			'titre': $("#obj_titre").val(), 
+		var newObj = {
+			'titre': $("#obj_titre").val(),
 			'description': $("#obj_descr").val()
-		});
+		}
 
-		$("#obj_titre").val('').focus();
-		$("#obj_descr").val('');
-	});
+        // Use AJAX to post the object to our adduser service
+        $.ajax({
+        	type: 'POST',
+        	data: newObj,
+        	url: '/objectifs/addobjectif',
+        	dataType: 'JSON'
+        }).done(function( response ) {
+            // Check for successful (blank) response
+            if (response.msg === '') {
+                // Send socket
+                socket.emit('new_obj', newObj);
+            }
+            else {
+                // If something goes wrong, alert the error message that our service returned
+                alert('Error: ' + response.msg);
+            }
+        });
+
+        $("#obj_titre").val('').focus();
+        $("#obj_descr").val('');
+    });
 });
 
 function populateList() {
@@ -43,33 +60,7 @@ function newQuest(message) {
 	$("#new").show();
 
 	$("#ok_obj").click(function() {
-		addObj(message);
+		populateList();
+		$("#new").empty().hide();
 	});
 }
-
-function addObj(message) {
-	$("#new").empty().hide();
-	var newObj = {
-		'titre': message.titre,
-		'description': message.description
-	}
-
-        // Use AJAX to post the object to our adduser service
-        $.ajax({
-        	type: 'POST',
-        	data: newObj,
-        	url: '/objectifs/addobjectif',
-        	dataType: 'JSON'
-        }).done(function( response ) {
-
-            // Check for successful (blank) response
-            if (response.msg === '') {
-                // Update the table
-                populateList();
-            }
-            else {
-                // If something goes wrong, alert the error message that our service returned
-                alert('Error: ' + response.msg);
-            }
-        });
-    };

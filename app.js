@@ -12,7 +12,6 @@ var db = mongo.db('mongodb://localhost:27017/projet_jin', {native_parser:true});
 var routes = require('./routes/index');
 var users = require('./routes/users');
 var objectifs = require('./routes/objectifs');
-var server = require('./routes/server');
 
 var app = express();
 app.server = http.createServer(app)
